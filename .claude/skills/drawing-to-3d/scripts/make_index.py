@@ -24,16 +24,19 @@ for f in sorted(root.glob("**/*_summary.json")):
     note = next(iter(sorted(f.parent.glob("*.md"))), None)
     link = f"[[{note.stem}]]" if note else "-"
     bb = " × ".join(f"{v:g}" for v in s["bbox_mm"])
-    ok = "✔" if s.get("valid") else "⚠ 형상 오류"
-    rows.append(f"| {s['part_no']} | {s.get('name', '')} | {bb} | {s['total_mass_kg']:g} | {ok} | "
-                f"`{rel}/{stem}.step` | {link} |")
+    if s.get("mode") == "지시문만":
+        ok, mass, model = "지시문만", "-", f"`{rel}/{stem}_SolidCraft지시문.txt`"
+    else:
+        ok = "✔" if s.get("valid") else "⚠ 형상 오류"
+        mass, model = f"{s['total_mass_kg']:g}", f"`{rel}/{stem}.step`"
+    rows.append(f"| {s['part_no']} | {s.get('name', '')} | {bb} | {mass} | {ok} | {model} | {link} |")
 
 today = datetime.date.today().isoformat()
 lines = [
     "---", f"date: {today}", "tags: [도면해석, 3D모델링, 일괄작업]", "---", "",
     f"# {a.title}", "",
     f"- 처리 완료: **{len(rows)}건**" + (f" / 실패: **{len(a.failed)}건**" if a.failed else ""), "",
-    "| 도번 | 품명 | 외곽 (mm) | 중량 (kg) | 형상 | STEP | 노트 |",
+    "| 도번 | 품명 | 외곽 (mm) | 중량 (kg) | 상태 | 모델/지시문 | 노트 |",
     "|---|---|---|---|---|---|---|",
     *rows,
 ]

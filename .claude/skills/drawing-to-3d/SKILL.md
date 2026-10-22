@@ -7,10 +7,19 @@ description: 2D 기계 도면 PDF(경성시험기 도면 양식 등)를 읽어 �
 
 사용자는 문과 출신 영업 부서장이다. 결과 설명은 짧고 쉬운 한국어로, 확인이 필요한 부분은 분명히 표시한다.
 
+## 모드 선택
+| 모드 | 언제 | 수행 단계 | 결과물 |
+|---|---|---|---|
+| **전체 모드** (기본) | 특별한 지시가 없을 때 | 1 → 2 → 3 → 4 | 해석 노트, STEP, STL, 미리보기, SolidCraft 지시문 |
+| **지시문만 모드** | "지시문만", "SolidCraft로 만들 거야", "STEP은 필요 없어" 등 | 1 → 2 → 3-B → 4 | 해석 노트, SolidCraft 지시문, spec JSON (STEP/STL/미리보기 없음) |
+
+지시문만 모드는 cadquery 설치와 미리보기 판독을 건너뛰므로 대량 작업에서 시간과 토큰이 줄어든다.
+대신 형상 검증이 치수 합계 검산뿐이므로, 노트에 "SolidCraft에서 measure로 외곽 치수 확인 필요"를 적는다.
+
 ## 0. 준비 (세션마다 1회)
 ```bash
-python3 -c "import cadquery" 2>/dev/null || pip install -q cadquery
 which pdftoppm   # 없으면: apt-get install -y poppler-utils
+python3 -c "import cadquery" 2>/dev/null || pip install -q cadquery   # 전체 모드만
 ```
 스크립트 경로: `SK=.claude/skills/drawing-to-3d/scripts` (저장소 루트 기준)
 
@@ -68,6 +77,13 @@ python3 -B $SK/build_model.py 폴더/*/*.json                    # 여러 건 (�
 2. `_preview.png`(등각·정면·평면·측면)를 Read로 열어 도면의 각 뷰와 비교한다. 다르면 spec을 고쳐 다시 만든다.
 3. 중량은 참고값으로만 쓴다(구멍·탭 생략).
 
+## 3-B. SolidCraft 지시문 생성 (두 모드 공통)
+```bash
+python3 -B $SK/make_prompt.py 출력폴더/<도번>.json      # 여러 건이면 폴더/*/*.json
+```
+출력: spec 옆에 `<도번>_<품명>_SolidCraft지시문.txt`. 화면에 찍히는 `bbox_mm`이 도면 외곽 치수와 같은지 확인한다(지시문만 모드에서는 이것이 유일한 형상 검산).
+지시문은 손으로 다시 쓰지 말고 이 파일 내용을 노트에 그대로 넣는다.
+
 ## 4. 결과물 저장
 저장소 관례: `inbox/YYYYMMDD_<주제>/` (사용자는 이 폴더들을 Obsidian `경성시험기` 볼트로 옮겨 관리)
 - 한 건: `inbox/YYYYMMDD_<도번>_3D모델링/`
@@ -81,12 +97,14 @@ python3 -B $SK/build_model.py 폴더/*/*.json                    # 여러 건 (�
 4. 모델에 반영하지 않은 가공 (탭, 공차, 별도 도번)
 5. **모델 가정 사항 (설계 확인 필요)** — 번호 목록
 6. 파일 목록과 용도 (STEP=설계·고객 전달, STL=3D 프린팅/뷰어)
-7. **SolidCraft 에이전트 채팅용 지시문** — 좌표가 들어간 번호 목록 문장. 사용자가 SolidCraft 채팅창에 그대로 붙여넣는다.
+7. **SolidCraft 에이전트 채팅용 지시문** — 3-B에서 만든 .txt 내용을 코드 블록으로. 사용자가 SolidCraft 채팅창에 그대로 붙여넣는다.
+
+지시문만 모드: 노트에서 2번(미리보기)과 6번의 STEP/STL 항목을 빼고, 맨 위에 `mode: 지시문만`을 YAML에 넣는다.
 
 ## 5. 대량(일괄) 작업 절차
 1. 대상 PDF 목록을 먼저 보여주고 건수를 확인한다(`ls *.pdf`, `pdfinfo`로 페이지 수). PDF 한 파일에 여러 장이면 장마다 도번 하나로 본다.
 2. 조립도(부품표가 있고 여러 도번을 참조)와 부품도를 구분한다. 부품도를 먼저, 조립도는 마지막에 한다.
-3. 한 건씩 1~3단계를 수행하고 진행 상황을 짧게 알린다("3/12 A01200 완료"). 한 건이 막히면 "보류" 사유를 적고 다음으로 넘어간다.
+3. 한 건씩 선택한 모드의 단계를 수행하고 진행 상황을 짧게 알린다("3/12 A01200 완료"). 한 건이 막히면 "보류" 사유를 적고 다음으로 넘어간다.
 4. 모두 끝나면 색인 노트를 만든다:
    ```bash
    python3 -B $SK/make_index.py inbox/YYYYMMDD_도면일괄_3D모델링 --failed "A01500: 단면도 판독 불가"
