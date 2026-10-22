@@ -1,0 +1,37 @@
+{
+  "part_no": "A01000",
+  "name": "FRAME",
+  "material": "SS400",
+  "density": 7850,
+  "source_pdf": "A01000_FRAME.pdf",
+  "origin_note": "원점 = 파이프 프레임 좌측-전면-바닥(받침판 아래면). X=길이 Y=깊이 Z=높이",
+  "assumptions": [
+    "받침판 A01300 95x95x12 (외측 10 돌출은 도면, 내측 10은 가정)",
+    "410L 6개 = 양끝 상하 4 + 중앙 상하 2 로 추정",
+    "탭 구멍, 상판 구멍(A01100), 캐스터 생략"
+  ],
+  "bodies": [
+    {
+      "name": "FRAME_SQ75x75x3.2t",
+      "items": [
+        {"type": "tube", "origin": [0, 0, 12], "size": [75, 75, 548], "wall": 3.2,
+         "array": {"count": [2, 2], "pitch": [1385, 485]}, "note": "548L x4 다리"},
+        {"type": "tube", "origin": [75, 0, 12], "size": [1310, 75, 75], "wall": 3.2,
+         "array": {"count": [1, 2, 2], "pitch": [0, 485, 473]}, "note": "1310L x4"},
+        {"type": "tube", "origin": [0, 75, 12], "size": [75, 410, 75], "wall": 3.2,
+         "array": {"count": [3, 1, 2], "pitch": [692.5, 0, 473]}, "note": "410L x6"},
+        {"type": "tube", "origin": [692.5, 0, 87], "size": [75, 75, 398], "wall": 3.2,
+         "array": {"count": [1, 2], "pitch": [0, 485]}, "note": "398L x2 중앙기둥"}
+      ]
+    },
+    {
+      "name": "A01100_TOP_PLATE",
+      "items": [{"type": "box", "origin": [-20, -20, 560], "size": [1500, 600, 40]}]
+    },
+    {
+      "name": "A01300_FOOT_PLATE",
+      "items": [{"type": "box", "origin": [-10, -10, 0], "size": [95, 95, 12],
+                 "array": {"count": [2, 2], "pitch": [1385, 485]}}]
+    }
+  ]
+}
