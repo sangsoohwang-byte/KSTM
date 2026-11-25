@@ -15,7 +15,8 @@ description: >
 
 ## 스크립트 위치
 - GitHub 저장소(KSTM): `.claude/skills/견적서BOM/scripts/generate_bom.py` ← 2026-11-25부터 원본은 여기
-- 예전 PC 위치(볼트에서 정리됨): `C:\Users\User\경성시험기\generate_bom.py`
+- PC 위치(PC의 견적서BOM 스킬이 여기서 실행하므로 볼트에 그대로 둠): `C:\Users\User\경성시험기\generate_bom.py`
+- 코드를 고치면 두 곳의 내용을 같게 맞춘다.
 - 필요 패키지: `openpyxl`
 
 > **판매단가 규칙 (2026-11-25 사용자 확인, 코드와 일치)**
